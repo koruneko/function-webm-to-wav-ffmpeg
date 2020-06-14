@@ -24,7 +24,7 @@ public static HttpResponseMessage Run(Stream req, TraceWriter log)
 	log.Info($"Renc Length: {bs.Length}");
 
 	try
-    {
+	{
 	    var psi = new ProcessStartInfo();
 	    psi.FileName = @"D:\home\site\wwwroot\ConvertAudioFormatUsingFFMpeg\ffmpeg.exe";
 	    psi.Arguments = $"-i \"{temp}\" \"{tempOut}\"";
@@ -35,38 +35,37 @@ public static HttpResponseMessage Run(Stream req, TraceWriter log)
 	    log.Info($"Args: {psi.Arguments}");
 	    var process = Process.Start(psi);
 
-        var oa = process.StandardOutput.ReadToEnd();
-        var ea = process.StandardError.ReadToEnd();
+	    var oa = process.StandardOutput.ReadToEnd();
+	    var ea = process.StandardError.ReadToEnd();
 
 	    process.WaitForExit((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
 
-        log.Info($"out: {oa}");
-        log.Info($"errorout: {ea}");
+	    log.Info($"out: {oa}");
+	    log.Info($"errorout: {ea}");
 	}
-    catch(Exception ex)
-    {
+	catch(Exception ex)
+	{
 		log.Info(ex.Message);
 	}
-    
-    try
-    {
-        var bytes = File.ReadAllBytes(tempOut);
-        log.Info($"Renc Length: {bytes.Length}");
+	try
+	{
+		var bytes = File.ReadAllBytes(tempOut);
+		log.Info($"Renc Length: {bytes.Length}");
 
-        var response = new HttpResponseMessage(HttpStatusCode.OK);
-        response.Content = new StreamContent(new MemoryStream(bytes));
-        response.Content.Headers.ContentType = new MediaTypeHeaderValue("audio/wav");
+		var response = new HttpResponseMessage(HttpStatusCode.OK);
+		response.Content = new StreamContent(new MemoryStream(bytes));
+		response.Content.Headers.ContentType = new MediaTypeHeaderValue("audio/wav");
 
-        File.Delete(tempOut);
-        File.Delete(temp);
-        Directory.Delete(tempPath, true);
+		File.Delete(tempOut);
+		File.Delete(temp);
+		Directory.Delete(tempPath, true);
 
-        return response;
-    }
-    catch(Exception ex)
-    {
+		return response;
+	}
+	catch(Exception ex)
+	{
 		log.Info($"error!: {ex.Message}");
-
-        return new HttpResponseMessage(HttpStatusCode.BadRequest);
+		
+		return new HttpResponseMessage(HttpStatusCode.BadRequest);
 	}
 }
